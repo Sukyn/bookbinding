@@ -1,3 +1,5 @@
+// app/components/BookCard.tsx
+/* eslint-disable @next/next/no-img-element */
 'use client'
 
 import React, { useState } from 'react'

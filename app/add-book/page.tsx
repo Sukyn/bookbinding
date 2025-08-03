@@ -62,10 +62,13 @@ export default function AddBook() {
 
       // 3) Redirection
       router.push('/')
-    } catch (err: any) {
-      console.error(err)
-      setError(err.message || 'Une erreur est survenue, réessayez.')
-    } finally {
+    } catch (err: unknown) {
+        console.error(err)
+        // Si c'est une Error, on affiche son message, sinon un message générique
+        const message =
+          err instanceof Error ? err.message : 'Une erreur est survenue, réessayez.'
+        setError(message)
+      } finally {
       setLoading(false)
     }
   }
