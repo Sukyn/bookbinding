@@ -1,0 +1,19 @@
+backend:
+  name: git-gateway
+  branch: main
+
+media_folder: "public/images"
+public_folder: "/images"
+
+collections:
+  - name: "books"
+    label: "Livres"
+    folder: "content/books"
+    create: true
+    slug: "{{slug}}"
+    fields:
+      - { label: "Titre",    name: "title",  widget: "string" }
+      - { label: "Auteur",   name: "author", widget: "string" }
+      - { label: "Recto",    name: "front",  widget: "image" }
+      - { label: "Verso",    name: "back",   widget: "image" }
+      - { label: "Intérieur",name: "inside", widget: "image" }
