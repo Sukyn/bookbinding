@@ -30,7 +30,7 @@ export default function EditBook() {
   const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME!
   const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!
 
-  // 1. Charger les données existantes
+  // 1. Chargement des données existantes
   useEffect(() => {
     async function fetchBook() {
       try {
@@ -45,9 +45,13 @@ export default function EditBook() {
         setAuthor(data.author as string)
         setPrice((data.price as number) ?? '')
         setDescription((data.description as string) ?? '')
-        setPhotos(Array.isArray(data.photos) ? (data.photos as string[]) : [])
-      } catch (e) {
-        console.error(e)
+        setPhotos(
+          Array.isArray(data.photos)
+            ? (data.photos as string[])
+            : []
+        )
+      } catch (fetchError) {
+        console.error(fetchError)
         setError('Erreur de chargement.')
       } finally {
         setLoading(false)
@@ -56,7 +60,7 @@ export default function EditBook() {
     fetchBook()
   }, [id])
 
-  // 2. Soumettre la mise à jour
+  // 2. Soumission de la mise à jour
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault()
     setLoading(true)
@@ -65,18 +69,17 @@ export default function EditBook() {
     try {
       let finalPhotos = photos
 
-      // Si l'utilisateur a sélectionné de nouvelles images
       if (newFiles && newFiles.length > 0) {
         const urls: string[] = []
         for (let i = 0; i < newFiles.length; i++) {
           const file = newFiles[i]
-          const data = new FormData()
-          data.append('file', file)
-          data.append('upload_preset', uploadPreset)
+          const form = new FormData()
+          form.append('file', file)
+          form.append('upload_preset', uploadPreset)
 
           const res = await fetch(
             `https://api.cloudinary.com/v1_1/${cloudName}/image/upload`,
-            { method: 'POST', body: data }
+            { method: 'POST', body: form }
           )
           const json = await res.json()
           if (!json.secure_url) {
@@ -87,7 +90,6 @@ export default function EditBook() {
         finalPhotos = urls
       }
 
-      // Mise à jour du document Firestore
       const ref = doc(db, 'books', id)
       await updateDoc(ref, {
         title,
@@ -98,20 +100,21 @@ export default function EditBook() {
         updatedAt: Timestamp.now()
       })
 
-      // Redirection vers l’accueil
       router.push('/')
-    } catch (e: unknown) {
-      console.error(e)
-      const message =
-        e instanceof Error ? e.message : 'Erreur lors de la mise à jour.'
-      setError(message)
+    } catch (submitError) {
+      console.error(submitError)
+      const msg =
+        submitError instanceof Error
+          ? submitError.message
+          : 'Erreur lors de la mise à jour.'
+      setError(msg)
     } finally {
       setLoading(false)
     }
   }
 
   if (loading) return <p className="p-6 text-center">Chargement…</p>
-  if (error) return <p className="p-6 text-center text-red-600">{error}</p>
+  if (error)   return <p className="p-6 text-center text-red-600">{error}</p>
 
   return (
     <div className="max-w-lg mx-auto p-6">
@@ -208,3 +211,4 @@ export default function EditBook() {
     </div>
   )
 }
+
