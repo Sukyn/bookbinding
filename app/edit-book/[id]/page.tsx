@@ -9,7 +9,8 @@ import {
   doc,
   getDoc,
   updateDoc,
-  Timestamp
+  Timestamp,
+  DocumentData
 } from 'firebase/firestore'
 
 export default function EditBook() {
@@ -37,15 +38,14 @@ export default function EditBook() {
         const snap = await getDoc(ref)
         if (!snap.exists()) {
           setError('Livre introuvable.')
-          setLoading(false)
           return
         }
-        const data = snap.data() as any
-        setTitle(data.title)
-        setAuthor(data.author)
-        setPrice(data.price ?? '')
-        setDescription(data.description ?? '')
-        setPhotos(Array.isArray(data.photos) ? data.photos : [])
+        const data = snap.data() as DocumentData
+        setTitle(data.title as string)
+        setAuthor(data.author as string)
+        setPrice((data.price as number) ?? '')
+        setDescription((data.description as string) ?? '')
+        setPhotos(Array.isArray(data.photos) ? (data.photos as string[]) : [])
       } catch (e) {
         console.error(e)
         setError('Erreur de chargement.')
@@ -190,8 +190,7 @@ export default function EditBook() {
             onChange={e => setNewFiles(e.target.files)}
           />
           <p className="text-sm text-gray-500">
-            Sélectionnez de nouvelles images pour remplacer les anciennes.
-            Sinon laissez vide pour conserver les photos existantes.
+            Laissez vide pour conserver les photos existantes.
           </p>
         </div>
 
